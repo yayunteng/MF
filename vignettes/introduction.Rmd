@@ -1,0 +1,343 @@
+---
+title: "A Quick Introduction to MF via Examples"
+author: ""
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette:
+    vignette: >
+      %\VignetteIndexEntry{A Quick Introduction to MF via Examples}
+      %\VignetteEngine{knitr::rmarkdown}
+      %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", 
+                      fig.retina = 2,
+                      fig.align = 'center',
+                      fig.width = 7, fig.height = 5,
+                      warning = FALSE, message = FALSE)
+options("width"=200)
+library(MF)
+library(tidyverse)
+data(output1)
+data(output2)
+```
+
+
+## SOFTWARE NEEDED TO RUN MF IN R
+- Required: [R](https://cran.r-project.org/)
+- Suggested: [RStudio IDE](https://www.rstudio.com/products/RStudio/#Desktop)
+
+## HOW TO RUN MF:
+
+```{r eval=FALSE, echo=FALSE}
+## install the latest version from github
+install.packages('devtools')
+library(devtools)
+install_github('yayunteng/MF')
+## import packages
+library(MF)
+```
+
+
+Here are four main functions we provide in this package : 
+
+- **mf** : Computing multi-fuctionality when all functions are assumed to be independent, or when the correlation between any two functions is adjusted for. In the latter case, our MF value is obtained based on an integrated measure by considering all possible threshold levels.
+- **mfbeta** : Computing decomposition of multi-fuctionality in multiple ecosystems when all functions are assumed to be independent, or when the correlation between any two functions is adjusted for. 
+
+- **ggmf** : Visualizing the output from the function `mf`
+- **ggmfbeta** : Visualizing the output from the function `mfbeta`
+
+
+## Multi-functionality: mf()
+
+We first describe the main function `mf()` with default arguments: 
+
+```{r eval=FALSE}
+#mf()
+```
+
+
+The arguments of this function are briefly described below, and will be explained in more details by illustrative examples in later text. This main function computes multi-fuctionality of order q  when all functions are assumed to be independent or when the correlation is considered.
+
+
+
+The arguments of this function are briefly described below, and will be explained in more details by illustrative examples in later text. This main function computes gamma, alpha and beta diversity estimates of order q at specified sample coverage or sample size and measure of diversity. By default of <code>base = "size"</code> and <code>level = NULL</code>, then this function computes the gamma and alpha diversity estimates up to double the reference sample size in each region. If <code>base = "coverage"</code> and <code>level = NULL</code>, then this function computes the gamma, alpha, beta diversity, and four dissimilarity-turnover indices estimates up to one (for q = 1, 2) or up to the coverage of double the reference sample size (for q = 0).
+
+  
+<table style="width:100%;">
+<colgroup>
+<col width="20%">
+<col width="80%">
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Argument</th>
+<th align="left">Description</th>
+
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><code>data</code></td>
+<td align="left">
+(a) For <code>datatype = "abundance"</code>, data can be input as a <code>matrix/data.frame</code> (species by assemblages), or a list of <code>matrices/data.frames</code>, each matrix represents species-by-assemblages abundance matrix. \cr
+(b) For <code>datatype = "incidence_raw"</code>, data can be input as a <code>list</code> (a region) with several <code>lists</code> (assemblages) of <code>matrices/data.frames</code>, each matrix represents species-by-sampling units.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>diversity</code></td>
+<td align="left">selection of diversity type: <code>TD</code> = Taxonomic diversity, <code>PD</code> = Phylogenetic diversity, and <code>FD</code> = Functional diversity.</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>q</code></td>
+<td align="left">a numerical vector specifying the diversity orders. Default is <code>c(0, 1, 2)</code>.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>datatype</code></td>
+<td align="left">data type of input data: individual-based abundance data (<code>datatype = "abundance"</code>) or species by sampling-units incidence matrix (<code>datatype = "incidence_raw"</code>) with all entries being 0 (non-detection) or 1 (detection).</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>base</code></td>
+<td align="left">Sample-sized-based rarefaction and extrapolation for gamma and alpha diversity (<code>base = "size"</code>) or coverage-based rarefaction and extrapolation for gamma, alpha and beta diversity (<code>base = "coverage"</code>). Default is <code>base = "coverage"</code>.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>level</code></td>
+<td align="left">A numerical vector specifying the particular value of sample coverage (between 0 and 1 when <code>base = "coverage"</code>) or sample size (<code>base = "size"</code>). <code>level = 1</code> (<code>base = "coverage"</code>) means complete coverage  \cr
+(the corresponding diversity represents asymptotic diversity). \cr
+If <code>base = "size"</code> and <code>level = NULL</code>, then this function computes the gamma and alpha diversity estimates up to double the reference sample size.  \cr
+If <code>base = "coverage"</code> and <code>level = NULL</code>, then this function computes the gamma and alpha diversity estimates up to one (for <code>q = 1, 2</code>) or up to the coverage of double the reference sample size (for <code>q = 0</code>);
+the corresponding beta diversity is computed up to the same maximum coverage as the alpha diversity.</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>nboot</code></td>
+<td align="left">a positive integer specifying the number of bootstrap replications when assessing sampling uncertainty and constructing confidence intervals. Bootstrap replications are generally time consuming. Enter <code>0</code> to skip the bootstrap procedures. Default is <code>20</code>. If more accurate results are required, set <code>nboot = 100</code> (or <code>200</code>).</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>conf</code></td>
+<td align="left">a positive number < 1 specifying the level of confidence interval. Default is <code>0.95</code>.</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>PDtree</code></td>
+<td align="left">a <code>phylo</code>(required only when <code>diversity = "PD"</code>), a phylogenetic tree in Newick format for all observed species in the pooled assemblage.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>PDreftime</code></td>
+<td align="left">(required only when <code>diversity = "PD"</code>), a numerical value specifying reference time for PD. Default is <code>NULL</code> (i.e., the age of the root of PDtree).</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>PDtype</code></td>
+<td align="left">(required only when <code>diversity = "PD"</code>), select PD type: <code>PDtype = "PD"</code> (effective total branch length) or <code>PDtype = "meanPD"</code> (effective number of equally divergent lineages). Default is <code>"meanPD"</code>, where <code>meanPD</code> = PD/tree depth.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>FDdistM</code></td>
+<td align="left">	
+(required only when <code>diversity = "FD"</code>), a species pairwise distance matrix for all species in the pooled assemblage.</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>FDtype</code></td>
+<td align="left">(required only when <code>diversity = "FD"</code>), select FD type: <code>FDtype = "tau_value"</code> for FD under a specified threshold value, or <code>FDtype = "AUC"</code> (area under the curve of tau-profile) for an overall FD which integrates all threshold values between zero and one. Default is <code>"AUC"</code>.</td>
+
+
+</tr>
+<tr class="even">
+<td align="center"><code>FDtau</code></td>
+<td align="left">(required only when <code>diversity = "FD"</code> and <code>FDtype = "tau_value"</code>), a numerical value between 0 and 1 specifying the tau value (threshold level). If <code>NULL</code> (default), then threshold is set to be the mean distance between any two individuals randomly selected from the pooled assemblage (i.e., quadratic entropy).</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>FDcut_number</code></td>
+<td align="left">(required only when <code>diversity = "FD"</code> and <code>FDtype = "AUC"</code>), a numeric number to split zero to one into several equal-spaced length. Default is <code>30</code>.</td>
+
+
+</tbody>
+</table>
+
+
+This function returns an `"mf"` object which can be further used to make plots using the function `ggmf()` to be described below. 
+
+
+
+
+### DATA FORMAT/INFORMATION
+Data should be given in standardize format, that means values of functions should be in [0, 1], and the larger of the value is better to functionality. Missing or unmeasured values should be input as <code>NA</code>. 
+
+A forest tree species and ecosystem function data is included in `MF` package for illustration. In the data, a total of 209 plots were established in mature forests in six countries, representing six major European forest types: boreal forest (Finland); hemi-boreal (Poland); temperate deciduous (Germany); mountainous deciduous (Romania); thermophilous deciduous (Italy); and Mediterranean mixed (Spain). In each country, three to five common tree species were selected for the species pool; species richness in 209 plots consisted of one to five species sampled from the species pool. A total of 26 ecosystem functions or properties were measured in each plot.
+
+For these data, the following commands display how to compute multi-functionality and	corresponding decomposition in multiple ecosystems .
+
+Run the following code to view forest data: (Here we only show the first ten rows for each matrix)
+
+```{r eval=FALSE}
+data("forest")
+forest
+```
+
+```{r echo=FALSE}
+#data("forest")
+#lapply(forest, function(x) x[1:10,])
+```
+
+
+### Computing Multi-functionality Via Example
+For example, we run the `mf()` function with forest data to compute uncorrelated and correlated multi-functionality. (Here we only show the first six outputs)
+
+```{r eval=FALSE}
+data("forest")
+output1 = mf(data = forest)
+output1
+```
+
+```{r echo=FALSE}
+# output1 = mf(data = forest)
+tmp <- output1
+tmp$qMF <- round(tmp$qMF, 3)
+head(tmp, 6)
+```
+
+The output contains ID of plot (`plotid`), species richness (`target_species_richness`), composition of species (`composition`), country which the plot belong to (`Country`), `Type` (uncorrelated or correlated), the diversity order (`Order.q`) and multi-functionality (`qMF`). 
+
+
+
+## Decomposition of Multi-functionality: mfbeta()
+We then describe the main function `mfbeta()` with default arguments: 
+
+```{r eval=FALSE}
+#mfbeta()
+```
+
+
+The arguments of this function are briefly described below, and will be explained in more details by illustrative examples in later text. This main function computes multi-fuctionality of order q  when all functions are assumed to be independent or when the correlation is considered.
+
+This function returns an `"mfbeta"` object which can be further used to make plots using the function `ggmfbeta()` to be described below. 
+
+### Computing Decomposition of Multi-functionality Via Example
+Then, we run the `mfbeta()` function with forest data to compute uncorrelated and correlated multi-functionality relationships across spatial scales. (Here we only show the first six outputs)
+
+```{r eval=FALSE}
+data("forest")
+output2 = mfbeta(data = forest)
+output2
+```
+
+```{r echo=FALSE}
+# output2 = mfbeta(data = forest)
+tmp <- output2
+tmp[,6:14] <- round(tmp[,6:14], 3)
+head(tmp, 6)
+```
+Each row of the output represents the decomposition of species richness and multi-functionality across two plots. The output contains ID (`plotid`), species richness (`target_species_richness`), composition of species (`composition`), `Country` of two plots, diversity order (`Order.q`), decomposition of species richness(`Species_gamma`, `Species_alpha`, `Species_beta`), uncorrelated multi-functionality(`MF_gamma`, `MF_alpha`, `MF_beta`) and correlated multi-functionality(`MF_gamma_cor`, `MF_alpha_cor`, `MF_beta_cor`).
+
+
+## Graphic Display: ggmf(), ggmfbeta()
+
+The function `ggmf()`, which extends `ggplot2` to the `"mf"` object with default arguments, is described as follows: 
+
+```{r eval=FALSE}
+ggmf(output, scale = 'fixed', fit.lm = TRUE)  
+```
+
+<table style="width:100%;">
+<colgroup>
+<col width="20%">
+<col width="80%">
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Argument</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><code>output</code></td>
+<td align="left">the output of <code>mf</code>.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>scale</code></td>
+<td align="left">Are scales shared across all facets (the default, <code>"fixed"</code>), or do they vary across rows (<code>"free_x"</code>), columns (<code>"free_y"</code>), or both rows and columns (<code>"free"</code>)?</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>fit.lm</code></td>
+<td align="left">If <code>TRUE</code>, the default, fitted line of linear model and estimated of slope are displayed.</td>
+
+
+</tbody>
+</table>
+
+
+The `ggmf()` function is a wrapper around the `ggplot2` package to display the relationship between species richness and multi-functionality using a single line of code. The resulting object is of class `"ggplot"`, so it can be manipulated using the `ggplot2` tools. Users can visualize the output with or wihout the fitted line of linear model by setting the parameter <code>**fit.lm**</code>:
+
+```{r, fig.align='center', fig.height=8, fig.width=6}
+ggmf(output1, scale = 'fixed', fit.lm = TRUE)
+```
+
+
+```{r, fig.align='center', fig.height=8, fig.width=6}
+ggmf(output1, scale = 'fixed', fit.lm = FALSE)  
+```
+
+
+The function `ggmfbeta()`, which extends `ggplot2` to the `"mfbeta"` object with default arguments, is described as follows: 
+
+```{r eval=FALSE}
+ggmfbeta(output2, scale = 'fixed', fit.lm = TRUE)  
+```
+
+<table style="width:100%;">
+<colgroup>
+<col width="20%">
+<col width="80%">
+</colgroup>
+<thead>
+<tr class="header">
+<th align="center">Argument</th>
+<th align="left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="center"><code>output</code></td>
+<td align="left">the output of <code>mfbeta</code>.</td>
+
+</tr>
+<tr class="even">
+<td align="center"><code>scale</code></td>
+<td align="left">Are scales shared across all facets (the default, <code>"fixed"</code>), or do they vary across rows (<code>"free_x"</code>), columns (<code>"free_y"</code>), or both rows and columns (<code>"free"</code>)?</td>
+
+</tr>
+<tr class="odd">
+<td align="center"><code>fit.lm</code></td>
+<td align="left">If <code>TRUE</code>, the default, fitted line of linear model and estimated of slope are displayed.</td>
+
+
+</tbody>
+</table>
+
+
+The `ggmfbeta()` function is a wrapper around the `ggplot2` package to display the relationship between the decomposition of species richness and multi-functionality (MF alpha vs. species alpha, MF beta vs. species beta, and MF gamma vs. species gamma). The resulting object is of class `"ggplot"`, when input contains only uncorrelated or correlated MF decomposition, so it can be manipulated using the `ggplot2` tools. The resulting object is of class `"list"` of two `"ggplot"` objects, when input contains both uncorrelated and correlated MF decomposition. Users can visualize the output with or wihout the fitted line of linear model by setting the parameter <code>**fit.lm**</code>:
+
+```{r, fig.align='center', fig.height=10, fig.width=6}
+ggmfbeta(output2, scale = 'fixed', fit.lm = TRUE)$uncorrelated
+ggmfbeta(output2, scale = 'fixed', fit.lm = TRUE)$correlated
+```
+
+```{r, fig.align='center', fig.height=10, fig.width=6}
+ggmfbeta(output2, scale = 'fixed', fit.lm = FALSE)$uncorrelated
+ggmfbeta(output2, scale = 'fixed', fit.lm = FALSE)$correlated
+```
+
+
