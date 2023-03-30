@@ -1,16 +1,16 @@
 ---
-title: "A Quick Introduction to MF via Examples"
-author: ''
-date: "`r Sys.Date()`"
+output: github_document
 ---
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(collapse = TRUE, comment = "#>", 
-                      fig.retina = 2,
-                      fig.align = 'center',
-                      fig.width = 7, fig.height = 5,
-                      warning = FALSE, message = FALSE)
-options("width"=200)
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
 library(MF)
 library(tidyverse)
 data(output1)
@@ -257,5 +257,4 @@ ggmf(output2, ecosystem = 'multiple', scale = 'fixed', fit.lm = TRUE)$correlated
 ggmf(output2, ecosystem = 'multiple', scale = 'fixed', fit.lm = FALSE)$uncorrelated
 ggmf(output2, ecosystem = 'multiple', scale = 'fixed', fit.lm = FALSE)$correlated
 ```
-
 
